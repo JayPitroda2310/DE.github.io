@@ -1,0 +1,509 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Android Voting System</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    html, body {
+      height: 100%;
+      font-family: Arial, sans-serif;
+      background: linear-gradient(135deg, #320074, #8e2de2);
+      overflow-x: hidden;
+      background: ;
+    }
+
+    .scroll-area {
+      height: 100vh;
+      position: relative;
+    }
+
+    .section-heading {
+      position: fixed;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%) scale(1);
+      color: white;
+      font-size: clamp(50px, 10vw, 70px);
+      font-weight: bold;
+      text-align: center;
+      max-width: 90%;
+      line-height: 1.3;
+      z-index: 1;
+      pointer-events: none;
+    }
+
+    .member {
+      font-size: 30px;
+      text-align: left;
+      margin-left: 280px;
+      margin-top: 40px;
+    }
+
+    .scale-container {
+      position: relative;
+      margin-top: 130vh;
+      display: flex;
+      justify-content: center;
+      z-index: 2;
+    }
+
+    .container {
+      position: relative;
+      width: 300px;
+      height: 600px;
+    }
+
+    .glow {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      width: 340px;
+      height: 640px;
+      background: radial-gradient(circle, rgba(255,255,255,0.6) 0%, transparent 70%);
+      filter: blur(100px);
+      z-index: 0;
+    }
+
+    .glass {
+      position: absolute;
+      top: -20px;
+      left: -20px;
+      width: 340px;
+      height: 640px;
+      background: rgba(255, 255, 255, 0.1);
+      backdrop-filter: blur(15px);
+      border-radius: 40px;
+      border: 1px solid rgba(255, 255, 255, 0.3);
+      box-shadow: 0 0 60px rgba(255, 255, 255, 0.2);
+      z-index: 1;
+    }
+
+    .phone {
+      position: relative;
+      width: 300px;
+      height: 600px;
+      background: #111;
+      border-radius: 30px;
+      box-shadow: 0 0 40px rgba(255, 255, 255, 0.3);
+      overflow: hidden;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      z-index: 2;
+    }
+
+    .screen {
+      width: 100%;
+      height: 100%;
+      background: #222;
+      border-radius: 30px;
+      color: white;
+      font-size: 20px;
+      position: relative;
+    }
+
+    .app-screen {
+      position: absolute;
+      width: 100%;
+      height: 100%;
+      top: 0;
+      left: 0;
+      background: #fff;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.3s ease;
+      border-radius: 30px;
+    }
+
+    .app-screen.active {
+      opacity: 1;
+      pointer-events: auto;
+    }
+
+    .app-screen h2 {
+      margin-bottom: 20px;
+      font-size: 24px;
+      color: #222;
+    }
+
+    .app-screen button {
+      padding: 10px 20px;
+      margin: 10px;
+      background: #6a00f4;
+      color: white;
+      border: none;
+      border-radius: 10px;
+      cursor: pointer;
+      font-size: 16px;
+    }
+
+    .details-section {
+      background: #fff;
+      color: #333;
+      padding: 80px 20px;
+      margin-top: 200px;
+      height: fit-content;
+    }
+
+    .details-container {
+      max-width: 800px;
+      margin: 0 auto;
+      text-align: center;
+      font-size: 1.1rem;
+      line-height: 1.6;
+    }
+
+    .details-container h2 {
+      font-size: 2rem;
+      margin-bottom: 20px;
+      color: #6a00f4;
+    }
+
+    .details-container ul {
+      list-style: none;
+      padding: 0;
+      margin-top: 10px;
+    }
+
+    .details-container li {
+      margin: 8px 0;
+      font-weight: 500;
+    }
+
+    .status-bar {
+      width: 100%;
+      height: 25px;
+      background: #000;
+      color: white;
+      font-size: 12px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 0 8px;
+      position: absolute;
+      top: 0;
+      left: 0;
+      z-index: 10;
+      font-weight: bold;
+      font-family: 'Courier New', monospace;
+    }
+
+    .status-bar .time {
+      letter-spacing: 1px;
+      margin-left: 10px;
+    }
+
+    .status-bar .status-icons {
+      display: flex;
+      gap: 5px;
+      font-size: 14px;
+      margin-right: 10px;
+    }
+
+    .login-content img {
+      width: 160px;
+      margin-bottom: 80px;
+      border-radius: 16px;
+    }
+
+    .login-content {
+      background: white;
+      color: black;
+      width: 100%;
+      height: 100%;
+      margin-top: 25px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .candidates-list {
+      display: flex;
+      flex-direction: column;
+      gap: 15px;
+      width: 100%;
+      overflow-y: auto;
+      padding: 10px 0;
+      margin-bottom: 10px;
+    }
+
+    .candidate-card {
+      display: flex;
+      align-items: center;
+      background: #f0f0f0;
+      border-radius: 12px;
+      padding: 10px;
+      box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+      cursor: pointer;
+      transition: transform 0.2s, border 0.2s;
+    }
+
+    .candidate-card:hover {
+      transform: scale(1.03);
+    }
+
+    .candidate-card.selected {
+      border: 2px solid #6a00f4;
+      background-color: #e4d8ff;
+    }
+
+    .candidate-photo {
+      width: 60px;
+      height: 60px;
+      object-fit: cover;
+      border: 2px solid #6a00f4;
+      margin-right: 12px;
+      background: white;
+    }
+
+    .candidate-info {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .party-logo {
+      width: 60px;
+      height: 60px;
+      object-fit: contain;
+      border: 2px solid #6a00f4;
+      background: white;
+    }
+
+    .candidate-name {
+      font-weight: bold;
+      font-size: 16px;
+      color: #222;
+    }
+
+    .name-details {
+      display: flex;
+      flex-direction: column;
+    }
+
+    .party-name {
+      font-size: 13px;
+      color: #666;
+      margin-top: 2px;
+    }
+
+    #voteBtn {
+      display: none;
+    }
+
+    .button-row {
+      display: flex;
+      gap: 10px;
+      justify-content: center;
+      margin-top: 10px;
+      flex-wrap: wrap;
+    }
+
+    .list1{
+      text-align: left;
+      margin-left: 220px;
+    }
+
+    .p2{
+      text-align: left;
+      margin-left: 20px;
+    }
+  </style>
+</head>
+<body>
+
+  <div class="scroll-area">
+    <div class="section-heading" id="heading">
+      Android Voting System<br>
+      <div class="member">
+      Developed by:
+      <ol>
+        <li>Jay Pitroda</li>
+        <li>Krishna Siddhapuria</li>
+      </ol>
+    </div>
+
+    </div>
+    
+
+
+    <div class="scale-container" id="phoneContainer">
+      <div class="container" id="phoneBlock">
+        <div class="glow"></div>
+        <div class="glass"></div>
+        <div class="phone">
+          <div class="screen">
+            <div class="status-bar">
+              <span class="time">12:30</span>
+              <span class="status-icons">📶 🔋</span>
+            </div>
+
+            <!-- Login Screen -->
+            <div class="app-screen active" id="screen-login">
+              <div class="login-content">
+                <img src="Group 14.png" alt="App Logo" />
+                <h2>Login</h2>
+                <button onclick="goToScreen('screen-candidates')">Next</button>
+              </div>
+            </div>
+
+            <!-- Candidate Selection Screen -->
+            <div class="app-screen" id="screen-candidates">
+              <h2 style="color: #222;">Select a Candidate</h2>
+              <div class="candidates-list">
+                <div class="candidate-card">
+                  <img class="candidate-photo" src="images (1).jpg" alt="Candidate 1" />
+                  <div class="candidate-info">
+                    <img class="party-logo" src="images (2).jpg" alt="Party 1" />
+                    <div class="name-details">
+                      <span class="candidate-name">Amit Shah</span>
+                      <span class="party-name">Bhartiya Janta Party</span>
+                    </div>
+                  </div>
+                </div>
+
+                <div class="candidate-card">
+                  <img class="candidate-photo" src="ShaktisinhGohil.jpeg" alt="Candidate 2" />
+                  <div class="candidate-info">
+                    <img class="party-logo" src="Indian_National_Congress_hand_logo.png" alt="Party 2" />
+                    <div class="name-details">
+                      <span class="candidate-name">Shaktisinh Gohil</span>
+                      <span class="party-name">Indian National Congress</span>
+                    </div>
+                  </div>
+                </div>
+
+                <div class="candidate-card">
+                  <img class="candidate-photo" src="download.jpg" alt="Candidate 3" />
+                  <div class="candidate-info">
+                    <img class="party-logo" src="download (1).jpg" alt="Party 3" />
+                    <div class="name-details">
+                      <span class="candidate-name">Chaitar Vasava</span>
+                      <span class="party-name">Aam Aadmi Party</span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+              <div class="button-row">
+                <button onclick="goToScreen('screen-login')">Back</button>
+                <button id="voteBtn" onclick="goToScreen('screen-confirm')">Vote</button>
+              </div>
+            </div>
+
+            <!-- Confirmation Screen -->
+            <div class="app-screen" id="screen-confirm">
+              <div style="display: flex; flex-direction: column; align-items: center; text-align: center;">
+              <div style="font-size: 60px; color: #28a745; margin-bottom: 20px;">✔️</div>
+                <h2 style="color: #222; margin-bottom: 20px;">Thanks for casting your vote!</h2>
+                <button onclick="goToScreen('screen-candidates')">Back</button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <!-- Info Section -->
+  <section class="details-section">
+    <div class="details-container">
+      <h2>About the Android Voting System</h2><br>
+      <p>
+        The Android Voting System is a secure and modern solution for conducting digital elections using smartphones.
+      </p>
+      <ul class="list1">
+        <li>✔️ Secure authentication & encryption</li>
+        <li>✔️ User-friendly mobile interface</li>
+        <li>✔️ Real-time vote tracking</li>
+        <li>✔️ Admin dashboard for managing polls</li>
+      </ul><br>
+      <p class="p2">
+        The Android Voting System was initially prototyped using HTML, CSS, and JavaScript for simulation within a browser. However, for real-world deployment on mobile devices, we plan to implement the app using Flutter, a modern UI toolkit developed by Google that allows for fast, cross-platform development.<br><br>
+
+The development environment will be set up using Android Studio, which provides robust tools for building, testing, and debugging Android applications. Backend services such as Firebase or Node.js with MongoDB may be considered to handle authentication, real-time vote tracking, and secure data storage.<br><br>
+
+By leveraging Flutter’s widget-driven architecture and Android Studio’s native support, the app ensures a smooth, high-performance experience on both Android and potentially iOS devices.
+
+
+      </p>
+    </div>
+  </section>
+  </div>
+
+  <!-- GSAP + Logic Script -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/ScrollTrigger.min.js"></script>
+  <script>
+    gsap.registerPlugin(ScrollTrigger);
+
+    gsap.to("#heading", {
+      scrollTrigger: {
+        trigger: "#phoneContainer",
+        start: "top 70%",
+        end: "top 30%",
+        scrub: 1.2
+      },
+      opacity: 0,
+      scale: 0.8,
+      filter: "blur(10px)"
+    });
+
+    window.addEventListener("load", () => {
+      const phone = document.querySelector("#phoneBlock");
+      ScrollTrigger.matchMedia({
+        "all": function () {
+          const phoneHeight = phone.offsetHeight;
+          const stopY = window.innerHeight / 2 - phoneHeight / 2;
+          gsap.to("#phoneBlock", {
+            y: -stopY,
+            ease: "power2.out",
+            scrollTrigger: {
+              trigger: "#phoneContainer",
+              start: "top 70%",
+              end: "top 70%",
+              scrub: true
+            }
+          });
+          goToScreen("screen-login");
+        }
+      });
+
+      const cards = document.querySelectorAll(".candidate-card");
+      const voteBtn = document.getElementById("voteBtn");
+
+      cards.forEach(card => {
+        card.addEventListener("click", () => {
+          cards.forEach(c => c.classList.remove("selected"));
+          card.classList.add("selected");
+          voteBtn.style.display = "inline-block";
+        });
+      });
+    });
+
+    function goToScreen(id) {
+      const screens = document.querySelectorAll(".app-screen");
+      screens.forEach(screen => {
+        if (screen.id === id) {
+          gsap.to(screen, { duration: 0.4, autoAlpha: 1 });
+          screen.classList.add("active");
+        } else {
+          gsap.to(screen, { duration: 0.4, autoAlpha: 0 });
+          screen.classList.remove("active");
+        }
+      });
+    }
+  </script>
+</body>
+</html>
